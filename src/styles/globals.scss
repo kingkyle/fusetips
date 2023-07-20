@@ -1,0 +1,15 @@
+:root {
+  --blue-color: #2525a9;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply text-sm
+}
+
+.btn-disabled, .btn-disabled:hover {
+  @apply opacity-60;
+}

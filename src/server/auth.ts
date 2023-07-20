@@ -5,9 +5,10 @@ import {
   type NextAuthOptions,
   type DefaultSession,
 } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-import { env } from "~/env.mjs";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "~/server/db";
+import bcrypt from "bcryptjs";
+import type { User } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -37,19 +38,63 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    // session: ({ session, user }) => {
+    //   return {
+    //   ...session,
+    //   user: {
+    //     ...session.user,
+    //     id: user.id,
+    //   },
+    // }},
+    jwt: ({ token, user }) => {
+      if (user) {
+        const u = user as User;
+        return {
+          ...token,
+          name: u.username,
+          id: u.id,
+        };
+      }
+      return token;
+    },
+  },
+  session: {
+    strategy: "jwt",
   },
   adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    CredentialsProvider({
+      type: "credentials",
+      name: "Email",
+      credentials: {
+        email: {
+          label: "Email Address",
+          type: "email",
+          placeholder: "jsmith@email.com",
+        },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials, _) {
+        try {
+          const user = await prisma.user.findFirstOrThrow({
+            where: { email: credentials?.email },
+          });
+          if (user != null) {
+            const isMatch = await bcrypt.compare(
+              credentials?.password ?? "",
+              user.password
+            );
+            if (isMatch) {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { password, ...newUser } = user;
+              return newUser;
+            }
+          }
+          return null;
+        } catch (error) {
+          return null;
+        }
+      },
     }),
     /**
      * ...add more providers here.
@@ -61,6 +106,10 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  pages: {
+    signIn: "/login",
+    newUser: "/register",
+  },
 };
 
 /**
