@@ -2,51 +2,229 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider     = "mysql"
-    url          = env("DATABASE_URL")
-    relationMode = "prisma"
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 // Necessary for Next auth
 
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Country {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  competitions Competition[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  predictions  Prediction[]
+  matches      Match[]
+  teams        Team[]
+}
 
-    @@index([userId])
+model Competition {
+  id          String              @id @default(cuid())
+  name        String              @unique
+  shortName   String
+  country     Country             @relation(fields: [countryId], references: [id])
+  countryId   String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  predictions Prediction[]
+  teams       TeamsCompetitions[]
+  matches     Match[]
+  sport       Sport               @relation(fields: [sportId], references: [id])
+  sportId     String
+
+  @@index([countryId])
+  @@index([sportId])
+}
+
+model Sport {
+  id               String           @id @default(cuid())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  name             String           @unique
+  competitions     Competition[]
+  marketCategories MarketCategory[]
+  markets          Market[]
+  teams            Team[]
+  predictions      Prediction[]
+  tickets          Ticket[]
+  matches          Match[]
+}
+
+model Team {
+  id              String              @id @default(uuid())
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  name            String
+  shortName       String
+  competitions    TeamsCompetitions[]
+  country         Country             @relation(fields: [countryId], references: [id])
+  countryId       String
+  homePredictions Prediction[]        @relation(name: "homeTeam")
+  awayPredictions Prediction[]        @relation(name: "awayTeam")
+  homeMatches     Match[]             @relation(name: "homeTeam")
+  awayMatches     Match[]             @relation(name: "awayTeam")
+  sport           Sport               @relation(fields: [sportId], references: [id])
+  sportId         String
+
+  @@index([countryId])
+  @@index([sportId])
+}
+
+model Market {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  category    MarketCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  predictions Prediction[]
+  sport       Sport          @relation(fields: [sportId], references: [id])
+  sportId     String
+
+  @@index([categoryId])
+  @@index([sportId])
+}
+
+model MarketCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  markets   Market[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sport     Sport    @relation(fields: [sportId], references: [id])
+  sportId   String
+
+  @@index([sportId])
+}
+
+model TeamsCompetitions {
+  id            String      @id @default(cuid())
+  team          Team        @relation(fields: [teamId], references: [id])
+  competition   Competition @relation(fields: [competitionId], references: [id])
+  teamId        String
+  competitionId String
+
+  @@unique([teamId, competitionId])
+  @@index([competitionId])
+  @@index([teamId])
+}
+
+model Prediction {
+  id            String               @id @default(cuid())
+  market        Market               @relation(fields: [marketId], references: [id])
+  marketId      String
+  competition   Competition          @relation(fields: [competitionId], references: [id])
+  competitionId String
+  homeTeam      Team                 @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
+  homeTeamId    String
+  awayTeam      Team                 @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
+  awayTeamId    String
+  result        String?
+  status        String               @default("pending")
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  tickets       PredictionsTickets[]
+  sport         Sport                @relation(fields: [sportId], references: [id])
+  sportId       String
+  isBanker      Boolean              @default(false)
+  country       Country              @relation(fields: [countryId], references: [id])
+  countryId     String
+
+  @@index([marketId])
+  @@index([competitionId])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
+  @@index([sportId])
+  @@index([countryId])
+}
+
+model Ticket {
+  id          String               @id @default(cuid())
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  name        String
+  predictions PredictionsTickets[]
+  isBanker    Boolean              @default(false)
+  Sport       Sport?               @relation(fields: [sportId], references: [id])
+  sportId     String?
+
+  @@index([sportId])
+}
+
+model PredictionsTickets {
+  id           String     @id @default(cuid())
+  prediction   Prediction @relation(fields: [predictionId], references: [id])
+  ticket       Ticket     @relation(fields: [ticketId], references: [id])
+  predictionId String
+  ticketId     String
+
+  @@index([predictionId])
+  @@index([ticketId])
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  competitionId String
+  homeTeamId    String
+  awayTeamId    String
+  date          DateTime
+  sportId       String
+  countryId     String
+  competition   Competition @relation(fields: [competitionId], references: [id])
+  sport         Sport       @relation(fields: [sportId], references: [id])
+  country       Country     @relation(fields: [countryId], references: [id])
+  homeTeam      Team        @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
+  awayTeam      Team        @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([competitionId])
+  @@index([sportId])
+  @@index([countryId])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
 }
 
 model User {
-    id                String              @id @default(cuid())
-    first_name        String
-    last_name         String
-    email             String              @unique
-    username          String              @unique
-    emailVerified     DateTime?
-    image             String?
-    sessions          Session[]
-    // Non Next Auth
-    role              String              @default("user")
-    password          String
-    VerificationToken VerificationToken[]
-    createdAt         DateTime            @default(now())
-    updatedAt         DateTime            @updatedAt
+  id                String              @id @default(cuid())
+  first_name        String
+  last_name         String
+  email             String              @unique
+  username          String              @unique
+  emailVerified     DateTime?
+  image             String?
+  sessions          Session[]
+  // Non Next Auth
+  role              String              @default("user")
+  password          String
+  VerificationToken VerificationToken[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
-    userId     String
-    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([identifier, token])
-    @@index([userId])
+  @@unique([identifier, token])
+  @@index([userId])
 }

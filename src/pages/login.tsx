@@ -14,9 +14,9 @@ import { getServerAuthSession } from "~/server/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import Router from "next/router";
+import type { ISessionUser } from "~/components/Shared/shared";
 
 export default function LoginPage() {
-
   const [isLoading, setIsLoading] = React.useState(false);
 
   const {
@@ -28,7 +28,7 @@ export default function LoginPage() {
   });
 
   const handleLogin: SubmitHandler<iLoginDto> = async (data) => {
-    setIsLoading(true)
+    setIsLoading(true);
     const res = await signIn("credentials", {
       email: data.email,
       password: data.password,
@@ -36,7 +36,7 @@ export default function LoginPage() {
       callbackUrl: "/account",
     });
     if (res?.error) {
-      setIsLoading(false)
+      setIsLoading(false);
       toast.error("Invalid Login");
       return;
     }
@@ -44,7 +44,7 @@ export default function LoginPage() {
       await Router.push("/account");
       return;
     }
-    setIsLoading(false)
+    setIsLoading(false);
   };
   return (
     <div>
@@ -110,8 +110,11 @@ export default function LoginPage() {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getServerAuthSession(context);
 
-  if (session) {
+  if (session && (session.user as ISessionUser)?.role == "user") {
     return { redirect: { destination: "/account" } };
+  }
+  if (session && (session.user as ISessionUser)?.role == "admin") {
+    return { redirect: { destination: "/admin" } };
   }
   return {
     props: {},

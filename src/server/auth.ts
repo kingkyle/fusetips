@@ -21,7 +21,7 @@ declare module "next-auth" {
     user: {
       id: string;
       // ...other properties
-      // role: UserRole;
+      role: string;
     } & DefaultSession["user"];
   }
 
@@ -38,19 +38,26 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    // session: ({ session, user }) => {
-    //   return {
-    //   ...session,
-    //   user: {
-    //     ...session.user,
-    //     id: user.id,
-    //   },
-    // }},
+    session: ({ session, token }) => {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+        session.user.role = (token.role as string)
+      }
+      return session;
+    },
+
+    redirect: ({ url, baseUrl }) => {
+      return url.startsWith(baseUrl)
+        ? Promise.resolve(url)
+        : Promise.resolve(baseUrl);
+    },
+
     jwt: ({ token, user }) => {
       if (user) {
         const u = user as User;
         return {
           ...token,
+          role: u.role,
           name: u.username,
           id: u.id,
         };
@@ -58,6 +65,7 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
   },

@@ -1,5 +1,6 @@
 :root {
   --blue-color: #2525a9;
+  --tip-orange: #00ff66;
 }
 
 @tailwind base;
@@ -7,9 +8,23 @@
 @tailwind utilities;
 
 body {
-    @apply text-sm
+  @apply text-sm;
 }
 
-.btn-disabled, .btn-disabled:hover {
+.btn-disabled,
+.btn-disabled:hover {
   @apply opacity-60;
+}
+
+.menu > li {
+  @apply text-white;
+}
+
+.menu > li > a {
+  @apply hover:text-tip-orange
+}
+
+.menu > li > a.active {
+  color: var(--tip-orange) !important;
+  background-color: var(--blue-color) !important;
 }
