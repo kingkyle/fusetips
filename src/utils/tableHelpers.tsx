@@ -89,6 +89,7 @@ export const teamTC = [
   teamCH.accessor("name", {
     id: "name",
     header: "Name",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   teamCH.accessor("shortName", {
     id: "shortName",
@@ -97,10 +98,12 @@ export const teamTC = [
   teamCH.accessor("country.name", {
     id: "country",
     header: "Country",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   teamCH.accessor("sport.name", {
     id: "sport",
     header: "Sport",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   teamCH.display({
     id: "action",

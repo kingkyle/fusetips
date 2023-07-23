@@ -1,34 +1,30 @@
-"use client";
-
 import React from "react";
-import Input from "../Forms/Input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { api } from "~/utils/api";
-import { toast } from "react-toastify";
-import SubmitButton from "../Forms/Button";
-import { addCompetitionDto, type iAddCompetitionDto } from "~/dto/competition";
 import MultiSelect, { type BasicOptions } from "../Forms/Select";
-
-export type ModalProp = {
-  my_modal_1: {
-    showModal: () => void;
-  };
-} & Window &
-  typeof globalThis;
+import SubmitButton from "../Forms/Button";
+import { api } from "~/utils/api";
+import { useForm } from "react-hook-form";
+import { addTeamDto, type iAddTeamDto } from "~/dto/team";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
+import { type ModalProp } from "./CompetitionModal";
+import Input from "../Forms/Input";
 
 type Props = {
   sportsData: BasicOptions[];
   countriesData: BasicOptions[];
+  competitionsData: BasicOptions[];
   isLoadingSports: boolean;
   isLoadingCountry: boolean;
+  isLoadingCompetition: boolean;
 };
 
-function AddCompetitionModal({
-  sportsData,
-  countriesData,
+export default function AddTeamModal({
   isLoadingSports,
   isLoadingCountry,
+  sportsData,
+  countriesData,
+  competitionsData,
+  isLoadingCompetition,
 }: Props) {
   const utils = api.useContext();
   const dialogFormRef = React.useRef<HTMLFormElement>(null);
@@ -39,27 +35,28 @@ function AddCompetitionModal({
     reset,
     control,
     formState: { errors },
-  } = useForm<iAddCompetitionDto>({
-    resolver: zodResolver(addCompetitionDto),
+  } = useForm<iAddTeamDto>({
+    resolver: zodResolver(addTeamDto),
   });
 
-  const addCompetititonM = api.competition.add.useMutation({
+  const addTeamM = api.team.add.useMutation({
     onSuccess: async (data) => {
       toast.success(data?.message);
       closeModal();
-      await utils.competition.list.invalidate();
+      await utils.team.list.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
 
-  const onSubmit = (data: iAddCompetitionDto) => {
-    addCompetititonM.mutate({
+  const onSubmit = (data: iAddTeamDto) => {
+    addTeamM.mutate({
       name: data.name,
       shortName: data.shortName,
       sportId: data.sportId,
       countryId: data.countryId,
+      competitions: data.competitions,
     });
   };
 
@@ -77,25 +74,25 @@ function AddCompetitionModal({
       reset({
         sportId: {},
         countryId: {},
+        competitions: [],
       });
     });
     return () => {
       dialogRef.current?.removeEventListener("close", () => null);
     };
   }, []);
-
   return (
     <div>
       <SubmitButton
         className="btn-primary btn-sm text-xs text-white"
         onClick={showModal}
       >
-        Add Competition
+        Add Team
       </SubmitButton>
       <dialog id="my_modal_1" className="modal" ref={dialogRef}>
         <form method="dialog" name="form-2" ref={dialogFormRef} />
         <form className="modal-box" onSubmit={handleSubmit(onSubmit)}>
-          <h3 className="text-lg font-bold">Add New Competition</h3>
+          <h3 className="text-lg font-bold">Add New Team</h3>
           <div className="py-4">
             <Input
               label={{
@@ -123,7 +120,7 @@ function AddCompetitionModal({
                 children: errors.shortName?.message,
               }}
             />
-            <MultiSelect<iAddCompetitionDto, BasicOptions>
+            <MultiSelect
               label={{
                 children: "Select Sport",
               }}
@@ -161,13 +158,32 @@ function AddCompetitionModal({
                 children: errors.countryId?.message,
               }}
             />
+            <MultiSelect
+              label={{
+                children: "Select Competitions",
+              }}
+              select={{
+                isMulti: true,
+                control: control,
+                className: "capitalize",
+                placeholder: "Select Competitions",
+                instanceId: "select-competitions",
+                options: competitionsData,
+                isLoading: isLoadingCompetition,
+                menuPlacement: "top",
+                name: "competitions",
+              }}
+              error={{
+                children: errors.competitions?.message,
+              }}
+            />
           </div>
           <div className="modal-action">
             <SubmitButton
               className="btn-primary btn-sm"
               type="submit"
-              isLoading={addCompetititonM.isLoading}
-              disabled={addCompetititonM.isLoading}
+              isLoading={addTeamM.isLoading}
+              disabled={addTeamM.isLoading}
             >
               Add
             </SubmitButton>
@@ -175,7 +191,7 @@ function AddCompetitionModal({
               className="btn-error btn-sm text-white"
               type="button"
               onClick={closeModal}
-              disabled={addCompetititonM.isLoading}
+              disabled={addTeamM.isLoading}
             >
               Close
             </SubmitButton>
@@ -185,5 +201,3 @@ function AddCompetitionModal({
     </div>
   );
 }
-
-export { AddCompetitionModal };
