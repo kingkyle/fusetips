@@ -134,10 +134,12 @@ export const categoryTC = [
   categoryCH.accessor("name", {
     id: "name",
     header: "Name",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   categoryCH.accessor("sport.name", {
     id: "sport",
     header: "Sport",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   categoryCH.display({
     id: "action",

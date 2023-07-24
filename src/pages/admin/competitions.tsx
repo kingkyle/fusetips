@@ -11,12 +11,9 @@ import { competitionTC } from "~/utils/tableHelpers";
 export default function CompetitionsPage() {
   const session = useSession();
 
-  const [competitionsQuery,countriesQuery, sportsQuery] = api.useQueries((t) => [
-    t.competition.list(),
-    t.country.list(),
-    t.sport.list(),
-
-  ]);
+  const [competitionsQuery, countriesQuery, sportsQuery] = api.useQueries(
+    (t) => [t.competition.list(), t.country.list(), t.sport.list()]
+  );
 
   const countriesData = React.useMemo(() => {
     const data: BasicOptions[] = [];
@@ -55,7 +52,11 @@ export default function CompetitionsPage() {
           />
         </div>
 
-        <Table data={competitionsData} columns={competitionTC} />
+        <Table
+          data={competitionsData}
+          columns={competitionTC}
+          isLoading={competitionsQuery.isLoading}
+        />
       </div>
     </AdminLayout>
   );

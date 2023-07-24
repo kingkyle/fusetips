@@ -59,7 +59,7 @@ export default function Table<T extends object>(props: TableProps<T>) {
         <tbody>
           {props.isLoading ? (
             <tr key={0}>
-              <td className="w-full p-4 text-center">
+              <td className="w-full p-4 text-center" colSpan={table.getFlatHeaders().length}>
                 <span className="loading loading-spinner"></span>
               </td>
             </tr>
