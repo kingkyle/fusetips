@@ -93,7 +93,12 @@ export default function MultiSelect<T extends FieldValues, V>(
             onBlur={onBlur}
             name={name}
             value={value}
-            onChange={onChange}
+            onChange={(v, a) => {
+              onChange(v, a);
+              props.select.handleChange
+                ? props.select.handleChange(v, a)
+                : null;
+            }}
           />
         )}
       />

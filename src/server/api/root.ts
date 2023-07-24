@@ -5,6 +5,7 @@ import { sportRouter } from "./routers/sport";
 import { competitionRouter } from "./routers/competition";
 import { teamRouter } from "./routers/team";
 import { categoryRouter } from "./routers/category";
+import { marketRouter } from "./routers/market";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   competition: competitionRouter,
   team: teamRouter,
   category: categoryRouter,
+  market: marketRouter,
 });
 
 // export type definition of API

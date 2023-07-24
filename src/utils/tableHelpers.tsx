@@ -115,14 +115,17 @@ export const marketTC = [
   marketCH.accessor("name", {
     id: "name",
     header: "Name",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   marketCH.accessor("category.name", {
     id: "category",
     header: "Category",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   marketCH.accessor("sport.name", {
     id: "sport",
     header: "Sport",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   marketCH.display({
     id: "action",
