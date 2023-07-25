@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "~/utils/api";
 import { toast } from "react-toastify";
 import SubmitButton from "../Forms/Button";
-import { addCompetitionDto, type iAddCompetitionDto } from "~/dto/competition";
+import { addCompetitionDto, type iAddCompetitionDtoOut, type iAddCompetitionDto } from "~/dto/competition";
 import MultiSelect, { type BasicOptions } from "../Forms/Select";
 
 export type ModalProp = {
@@ -39,9 +39,10 @@ function AddCompetitionModal({
     reset,
     control,
     formState: { errors },
-  } = useForm<iAddCompetitionDto>({
+  } = useForm<iAddCompetitionDto, null, iAddCompetitionDtoOut>({
     resolver: zodResolver(addCompetitionDto),
   });
+
 
   const addCompetititonM = api.competition.add.useMutation({
     onSuccess: async (data) => {
@@ -75,8 +76,8 @@ function AddCompetitionModal({
   React.useEffect(() => {
     dialogRef.current?.addEventListener("close", () => {
       reset({
-        sportId: {},
-        countryId: {},
+        sportId: null,
+        countryId: null,
       });
     });
     return () => {

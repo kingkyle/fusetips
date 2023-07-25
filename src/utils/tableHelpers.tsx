@@ -151,29 +151,34 @@ export const categoryTC = [
 ];
 
 export const matchTC = [
-  matchCH.accessor((row) => row.date.toString(), {
+  matchCH.accessor((row) => row.date.toLocaleString(), {
     id: "date",
     header: "Date",
   }),
   matchCH.accessor("homeTeam.name", {
     id: "homeTeam",
     header: "Home Team",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   matchCH.accessor("awayTeam.name", {
     id: "awayTeam",
     header: "Away Team",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   matchCH.accessor("competition.name", {
     id: "competition",
     header: "Competition",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   matchCH.accessor("country.name", {
     id: "country",
     header: "Country",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   matchCH.accessor("sport.name", {
     id: "sport",
     header: "Sport",
+    cell: (info) => <span className="capitalize">{info.getValue()}</span>,
   }),
   matchCH.display({
     id: "action",

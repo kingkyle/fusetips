@@ -1,6 +1,7 @@
 import { addTeamDto } from "~/dto/team";
 import { adminProtectedProcedure } from "../api/trpc";
 import { handleError } from "~/utils/error";
+import { idDto } from "~/dto/competition";
 
 export function addTeamProcedure() {
   return adminProtectedProcedure
@@ -46,6 +47,17 @@ export function listTeamsProcedure() {
         sport: true,
         country: true,
       },
+    });
+    return { data: teams, message: "", success: true };
+  });
+}
+
+export function listTeamsByCompetitionIdProcedure() {
+  return adminProtectedProcedure.input(idDto).query(async ({ input, ctx }) => {
+    const teams = await ctx.prisma.teamsCompetitions.findMany({
+      where: { competitionId: input.id },
+      include: { team: true },
+      orderBy: [{ team: { name: "asc" } }],
     });
     return { data: teams, message: "", success: true };
   });

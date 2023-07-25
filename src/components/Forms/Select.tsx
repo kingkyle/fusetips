@@ -28,6 +28,8 @@ interface Props<T extends FieldValues, V> {
   div?: JSX.IntrinsicElements["div"];
   error?: JSX.IntrinsicElements["div"];
   select: {
+    isClearable?: boolean;
+    ref?: React.RefObject<HTMLSelectElement>;
     control?: Control<T> | undefined;
     className?: string;
     key?: React.Key | string | null;
