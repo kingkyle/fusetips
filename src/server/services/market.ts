@@ -13,6 +13,7 @@ export function addMarketProcedure() {
             name: input.name.toLowerCase(),
             categoryId: input.categoryId.value,
             sportId: input.sportId.value,
+            description: input.description.toLowerCase()
           },
         });
         return { data, message: "Market Added", success: true };
@@ -32,6 +33,15 @@ export function listMarketProcedure() {
   });
 }
 
+export function listMarketByCategoryIDProcedure() {
+  return adminProtectedProcedure.input(idDto).query(async ({ input, ctx }) => {
+    const data = await ctx.prisma.market.findMany({
+      where: { categoryId: input.id },
+      orderBy: [{ name: "asc" }],
+    });
+    return { data, message: "", success: true };
+  });
+}
 export function listMarketBySportIDProcedure() {
   return adminProtectedProcedure.input(idDto).query(async ({ input, ctx }) => {
     const data = await ctx.prisma.market.findMany({

@@ -19,24 +19,22 @@ model Country {
   competitions Competition[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  predictions  Prediction[]
   matches      Match[]
   teams        Team[]
 }
 
 model Competition {
-  id          String              @id @default(cuid())
-  name        String              @unique
-  shortName   String
-  country     Country             @relation(fields: [countryId], references: [id])
-  countryId   String
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  predictions Prediction[]
-  teams       TeamsCompetitions[]
-  matches     Match[]
-  sport       Sport               @relation(fields: [sportId], references: [id])
-  sportId     String
+  id        String              @id @default(cuid())
+  name      String              @unique
+  shortName String
+  country   Country             @relation(fields: [countryId], references: [id])
+  countryId String
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  teams     TeamsCompetitions[]
+  matches   Match[]
+  sport     Sport               @relation(fields: [sportId], references: [id])
+  sportId   String
 
   @@index([countryId])
   @@index([sportId])
@@ -57,20 +55,18 @@ model Sport {
 }
 
 model Team {
-  id              String              @id @default(cuid())
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  name            String
-  shortName       String
-  competitions    TeamsCompetitions[]
-  country         Country             @relation(fields: [countryId], references: [id])
-  countryId       String
-  homePredictions Prediction[]        @relation(name: "homeTeam")
-  awayPredictions Prediction[]        @relation(name: "awayTeam")
-  homeMatches     Match[]             @relation(name: "homeTeam")
-  awayMatches     Match[]             @relation(name: "awayTeam")
-  sport           Sport               @relation(fields: [sportId], references: [id])
-  sportId         String
+  id           String              @id @default(cuid())
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  name         String
+  shortName    String
+  competitions TeamsCompetitions[]
+  country      Country             @relation(fields: [countryId], references: [id])
+  countryId    String
+  homeMatches  Match[]             @relation(name: "homeTeam")
+  awayMatches  Match[]             @relation(name: "awayTeam")
+  sport        Sport               @relation(fields: [sportId], references: [id])
+  sportId      String
 
   @@index([countryId])
   @@index([sportId])
@@ -79,6 +75,7 @@ model Team {
 model Market {
   id          String         @id @default(cuid())
   name        String         @unique
+  description String         @unique
   category    MarketCategory @relation(fields: [categoryId], references: [id])
   categoryId  String
   createdAt   DateTime       @default(now())
@@ -92,13 +89,14 @@ model Market {
 }
 
 model MarketCategory {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  markets   Market[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  sport     Sport    @relation(fields: [sportId], references: [id])
-  sportId   String
+  id          String       @id @default(cuid())
+  name        String       @unique
+  markets     Market[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  sport       Sport        @relation(fields: [sportId], references: [id])
+  sportId     String
+  predictions Prediction[]
 
   @@index([sportId])
 }
@@ -116,32 +114,29 @@ model TeamsCompetitions {
 }
 
 model Prediction {
-  id            String               @id @default(cuid())
-  market        Market               @relation(fields: [marketId], references: [id])
-  marketId      String
-  competition   Competition          @relation(fields: [competitionId], references: [id])
-  competitionId String
-  homeTeam      Team                 @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
-  homeTeamId    String
-  awayTeam      Team                 @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
-  awayTeamId    String
-  result        String?
-  status        String               @default("pending")
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  tickets       PredictionsTickets[]
-  sport         Sport                @relation(fields: [sportId], references: [id])
-  sportId       String
-  isBanker      Boolean              @default(false)
-  country       Country              @relation(fields: [countryId], references: [id])
-  countryId     String
+  id         String               @id @default(cuid())
+  market     Market               @relation(fields: [marketId], references: [id])
+  marketId   String
+  match      Match                @relation(fields: [matchId], references: [id])
+  matchId    String
+  result     String?
+  status     String               @default("pending")
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  tickets    PredictionsTickets[]
+  sport      Sport                @relation(fields: [sportId], references: [id])
+  sportId    String
+  category   MarketCategory       @relation(fields: [categoryId], references: [id])
+  categoryId String
+  isBanker   String               @default("false")
+  odd        String?
+  rating     Int?
 
+  @@unique([matchId, marketId])
   @@index([marketId])
-  @@index([competitionId])
-  @@index([homeTeamId])
-  @@index([awayTeamId])
+  @@index([matchId])
   @@index([sportId])
-  @@index([countryId])
+  @@index([categoryId])
 }
 
 model Ticket {
@@ -169,20 +164,21 @@ model PredictionsTickets {
 }
 
 model Match {
-  id            String      @id @default(cuid())
+  id            String       @id @default(cuid())
   competitionId String
   homeTeamId    String
   awayTeamId    String
   date          DateTime
   sportId       String
   countryId     String
-  competition   Competition @relation(fields: [competitionId], references: [id])
-  sport         Sport       @relation(fields: [sportId], references: [id])
-  country       Country     @relation(fields: [countryId], references: [id])
-  homeTeam      Team        @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
-  awayTeam      Team        @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  predictions   Prediction[]
+  competition   Competition  @relation(fields: [competitionId], references: [id])
+  sport         Sport        @relation(fields: [sportId], references: [id])
+  country       Country      @relation(fields: [countryId], references: [id])
+  homeTeam      Team         @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
+  awayTeam      Team         @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([competitionId])
   @@index([sportId])

@@ -33,7 +33,7 @@ export default function Table<T extends object>(props: TableProps<T>) {
     <div className="overflow-x-auto">
       <table
         className={cx(
-          "table table-pin-rows table-pin-cols table-md",
+          "table table-md table-pin-rows",
           props.tableclass
         )}
       >
@@ -75,7 +75,7 @@ export default function Table<T extends object>(props: TableProps<T>) {
                 <tr key={row.id} className={cx(props.trclass)}>
                   {row.getVisibleCells().map((cell) => {
                     return (
-                      <td key={cell.id} className={cx(props.tdclass)}>
+                      <td key={cell.id} className={cx("whitespace-nowrap",props.tdclass)}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

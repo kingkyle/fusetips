@@ -57,6 +57,7 @@ export default function AddMarketModal({ isLoadingSports, sportsData }: Props) {
   const onSubmit = (data: iAddMarketDto) => {
     addMarketM.mutate({
       name: data.name,
+      description: data.description,
       sportId: data.sportId,
       categoryId: data.categoryId,
     });
@@ -106,6 +107,19 @@ export default function AddMarketModal({ isLoadingSports, sportsData }: Props) {
               }}
               error={{
                 children: errors.name?.message,
+              }}
+            />
+            <Input
+              label={{
+                children: "Descriptive Name",
+              }}
+              input={{
+                className: "input-bordered",
+                placeholder: "Enter Descriptive Name",
+                ...register("description"),
+              }}
+              error={{
+                children: errors.description?.message,
               }}
             />
             <MultiSelect

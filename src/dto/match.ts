@@ -12,11 +12,6 @@ export const baseMatchDto = z.object({
     required_error: "please enter date",
     invalid_type_error: "Invalid date",
   }),
-  // date: z
-  //   .string({ required_error: "please enter date" })
-  //   .min(1, { message: "Please enter date" })
-  //   .datetime({ message: "Invalid Date", offset: true })
-  //   .pipe(z.coerce.date()),
 });
 
 export const matchSportCountryDto = z.object({
@@ -47,10 +42,22 @@ export const updateMatchDto = idDto.merge(baseMatchDto);
 
 const matchWithCountryCompetitionAndSport =
   Prisma.validator<Prisma.MatchArgs>()({
-    include: { sport: true, competition: true, country: true },
+    include: {
+      sport: true,
+      competition: true,
+      country: true,
+      homeTeam: true,
+      awayTeam: true,
+      predictions: {
+        include: {
+          market: true,
+          category: true,
+        },
+      },
+    },
   });
 
-export type MatchWithCountryCompetitionAndSport = Prisma.MatchGetPayload<
+export type iMatchData = Prisma.MatchGetPayload<
   typeof matchWithCountryCompetitionAndSport
 >;
 

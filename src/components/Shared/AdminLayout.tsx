@@ -16,9 +16,10 @@ export default function AdminLayout({ user, children, title }: Props) {
       <Head>
         <title>{title != null ? `FuseTips Admin - ${title}` : "FuseTips Admin"}</title>
       </Head>
-      <div className="drawer lg:drawer-open">
+      <div className="drawer lg:drawer-open overflow-hidden">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col">
+        <div className="drawer-content flex flex-col overflow-auto">
+          {/* Page content here */}
           <div className="flex items-center justify-between border-b p-4">
             <div>
               <label htmlFor="my-drawer-2" className="drawer-button lg:hidden">
@@ -73,7 +74,7 @@ export default function AdminLayout({ user, children, title }: Props) {
               </div>
             </div>
           </div>
-          {/* Page content here */}
+          
           <div>{children}</div>
         </div>
         <div className="drawer-side">
