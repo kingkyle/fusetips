@@ -30,7 +30,7 @@ function AddSportModal() {
 
   const addSportM = api.sport.add.useMutation({
     onSuccess: async (data) => {
-      toast.success(data.message);
+      toast.success(data?.message);
       closeModal();
       await utils.sport.list.invalidate()
     },
